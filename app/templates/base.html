@@ -1,19 +1,30 @@
-<html>
-  <head>
-    <title>Example</title>
-  </head>
-  <body>
-    <div>Example: <a href="/index">Home</a></div>
-    <hr>
-    {% with messages = get_flashed_messages() %}
+<!doctype html>
+<html lang="ru">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <title>ProjectX</title>
+
+  <!-- Bootstrap core CSS -->
+  <link href="static/bootstrap-4.0.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Custom styles for this template -->
+  <link href="static/login/style.css" rel="stylesheet">
+</head>
+
+<body class="text-center">
+  {% with messages = get_flashed_messages() %}
     {% if messages %}
-    <ul>
-    {% for message in messages %}
-        <li>{{ message }} </li>
-    {% endfor %}
-    </ul>
+      {% for message in messages %}
+        <p>{{ message }}</p>
+      {% endfor %}
     {% endif %}
-    {% endwith %}
-    {% block content %}{% endblock %}
-  </body>
+  {% endwith %}
+  {% block content %}{% endblock %}
+</body>
+
 </html>
