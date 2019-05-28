@@ -7,8 +7,14 @@ from app.forms import LoginForm, RegistrationForm
 
 @app.route('/')
 @app.route('/index')
+@login_required
 def index():
-    return render_template('base.html')
+    # user = g.user
+    return render_template('main.html')
+
+# @app.before_request
+# def before_request():
+#     g.user = current_user
 
 
 @app.route('/registration', methods=['GET', 'POST'])
@@ -17,34 +23,37 @@ def registration():
     if form.validate_on_submit():
         user = db.session.query(User).filter(
             User.email == form.email.data).first()
-        if user.email == form.email.data:
+        if user is not None:
             flash('User already exists. Sign In or enter different email.')
         else:
             u = models.User(name=form.name.data, surname=form.surname.data,
-                            email=form.email.data, password=form.password.data)
+                            email=form.email.data)
+            u.set_password(form.password.data)
             db.session.add(u)
             db.session.commit()
             flash('Successful registration!')
-            flash('Welcome, ' + form.name.data + ' ' + form.surname.data)
+            login_user(u, remember = True)
             return redirect('/index')
     return render_template('registration.html', form=form)
 
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    # if g.user is not None and g.user.is_authenticated():
-    #     return redirect(url_for('index'))
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
     form = LoginForm()
     if form.validate_on_submit():
         user = db.session.query(User).filter(
-            User.email == form.email.data, User.password == form.password.data).first()
-        try:
-            flash('Signing in...')
-            flash('Login ="' + user.email + '", password=' + user.password)
-            flash('Done!')
-            session['remember_me'] = form.remember_me.data
-            return redirect(url_for('index'))
-        except Exception:
-            flash("Wrong login or password! Please, try again")
-            print("Wrong login or password")
+            User.email == form.email.data).first()
+        if user is None or not user.check_password(form.password.data):
+            flash('Invalid e-mail or password')
+            return redirect(url_for('login'))
+        flash('Signing in...Done!')
+        login_user(user, remember=form.remember_me.data)
+        return redirect(url_for('index'))
     return render_template('login.html', form=form)
+
+@app.route('/logout')
+def logout():
+    logout_user()
+    return redirect(url_for('index'))
